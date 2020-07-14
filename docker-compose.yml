@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:12.3-alpine
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=atc
+
+  web:
+    image: concourse/concourse
+    networks:
+      - backend
+      - frontend
+    volumes:
+      - ./keys:/keys
+    environment:
+      - CONCOURSE_ADD_LOCAL_USER=admin:admin
+      - CONCOURSE_MAIN_TEAM_LOCAL_USER=admin
+      - CONCOURSE_SESSION_SIGNING_KEY=/keys/session_signing_key
+      - CONCOURSE_TSA_HOST_KEY=/keys/tsa_host_key
+      - CONCOURSE_TSA_AUTHORIZED_KEYS=/keys/authorized_worker_keys
+      - CONCOURSE_POSTGRES_HOST=db
+      - CONCOURSE_POSTGRES_USER=admin
+      - CONCOURSE_POSTGRES_PASSWORD=admin
+      - CONCOURSE_CLUSTER_NAME=sandbox
+    command: web
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+
+  worker:
+    image: concourse/concourse
+    networks:
+      - backend
+    volumes:
+      - ./keys:/keys
+    environment:
+      - CONCOURSE_TSA_HOST=web:2222
+      - CONCOURSE_TSA_PUBLIC_KEY=/keys/tsa_host_key.pub
+      - CONCOURSE_TSA_WORKER_PRIVATE_KEY=/keys/worker_key
+    command: worker
+    depends_on:
+      - web
+    privileged: true
+    stop_signal: SIGUSR2
+
+networks:
+  backend:
+  frontend:
+
+volumes:
+  db-data:
+
