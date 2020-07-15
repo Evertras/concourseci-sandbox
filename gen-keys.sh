@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd ${0%/*}
+
 rm -rf ./keys
 mkdir -p ./keys
 echo "===> Creating keys..."
