@@ -11,3 +11,19 @@ As much is from scratch as possible for learning purposes.
 docker-compose up
 ```
 
+## Run it in local Kubernetes
+
+Assumes Docker for Desktop, which lets us hit localhost for access rather than
+something like minikube which will require some IP shenanigans.
+
+And really this should be using the [actual Helm chart](https://github.com/concourse/concourse-chart)
+but because this is for learning funsies we're doing it more from scratch and
+we can focus on targeting a local K8s cluster.
+
+```bash
+# Add 127.0.0.1 for concourse.localhost
+sudo vim /etc/hosts
+
+./k8s/install.sh
+```
+

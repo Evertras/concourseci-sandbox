@@ -1,0 +1,223 @@
+################################################################################
+# POSTGRES
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: concourse
+  labels:
+    app: concourse
+    component: db
+spec:
+  selector:
+    matchLabels:
+      app: concourse
+      component: db
+  template:
+    metadata:
+      labels:
+        app: concourse
+        component: db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:12.3-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: admin
+            - name: POSTGRES_PASSWORD
+              value: admin
+            - name: POSTGRES_DB
+              value: atc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: concourse
+spec:
+  selector:
+    app: concourse
+    component: db
+  ports:
+    - protocol: TCP
+      port: 5432
+
+################################################################################
+# WEB
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: concourse
+  labels:
+    app: concourse
+    component: web
+spec:
+  selector:
+    matchLabels:
+      app: concourse
+      component: web
+  template:
+    metadata:
+      labels:
+        app: concourse
+        component: web
+    spec:
+      volumes:
+        - name: keys
+          secret:
+            secretName: web-keys
+      containers:
+        - name: web
+          image: concourse/concourse
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 2222
+              name: worker-ssh
+          env:
+            - name: CONCOURSE_ADD_LOCAL_USER
+              value: "admin:admin"
+            - name: CONCOURSE_MAIN_TEAM_LOCAL_USER
+              value: admin
+            - name: CONCOURSE_SESSION_SIGNING_KEY
+              value: /keys/session_signing_key
+            - name: CONCOURSE_TSA_HOST_KEY
+              value: /keys/tsa_host_key
+            - name: CONCOURSE_TSA_AUTHORIZED_KEYS
+              value: /keys/authorized_worker_keys
+            - name: CONCOURSE_POSTGRES_HOST
+              value: db
+            - name: CONCOURSE_POSTGRES_USER
+              value: admin
+            - name: CONCOURSE_POSTGRES_PASSWORD
+              value: admin
+            - name: CONCOURSE_CLUSTER_NAME
+              value: k8s-sandbox
+            - name: CONCOURSE_EXTERNAL_URL
+              value: http://concourse.localhost
+          volumeMounts:
+            - name: keys
+              readOnly: true
+              mountPath: "/keys"
+          args: [ web ]
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-worker-gateway
+  namespace: concourse
+  labels:
+    app: concourse
+    component: web
+spec:
+  selector:
+    app: concourse
+    component: web
+  ports:
+    - port: 2222
+      name: worker-ssh
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-http
+  namespace: concourse
+  labels:
+    app: concourse
+    component: web
+spec:
+  selector:
+    app: concourse
+    component: web
+  ports:
+    - port: 8080
+      name: http
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web
+  namespace: concourse
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+  - host: concourse.localhost
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: web-http
+          servicePort: http
+
+################################################################################
+# WORKERS
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: concourse
+  labels:
+    app: concourse
+    component: worker
+spec:
+  selector:
+    matchLabels:
+      app: concourse
+      component: worker
+  template:
+    metadata:
+      labels:
+        app: concourse
+        component: worker
+    spec:
+      volumes:
+        - name: keys
+          secret:
+            secretName: worker-keys
+      containers:
+        - name: worker
+          image: concourse/concourse
+          ports:
+            - containerPort: 8888
+          env:
+            - name: CONCOURSE_TSA_HOST
+              value: "web-worker-gateway:2222"
+            - name: CONCOURSE_TSA_PUBLIC_KEY
+              value: /keys/tsa_host_key.pub
+            - name: CONCOURSE_TSA_WORKER_PRIVATE_KEY
+              value: /keys/worker_key
+          volumeMounts:
+            - name: keys
+              readOnly: true
+              mountPath: "/keys"
+          args: [ worker ]
+          securityContext:
+            privileged: true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker
+  namespace: concourse
+  labels:
+    app: concourse
+    component: worker
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports: []
+  selector:
+    app: concourse
+    component: worker
