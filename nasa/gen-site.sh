@@ -23,7 +23,7 @@ sed "s/{{title}}/${TITLE}/" ./site/index.html \
   | sed "s/{{description}}/${DESCRIPTION}/" \
   > ${OUTPUT_DIR}/site/index.html
 
-IMG_URL=$(curl ${URL} \
+IMG_URL=$(curl -sL ${URL} \
   | grep 'meta property="og:image" content="' \
   | sed -n 's/.*content="\(.*\)".*/\1/p')
 
