@@ -18,6 +18,9 @@ OUTPUT_DIR=${4}
 
 #curl $IMG_URL -sLo site/pic.jpg
 
-sed -i "s/{{title}}/${TITLE}/" ./site/index.html
-sed -i "s/{{description}}/${DESCRIPTION}/" ./site/index.html
+cp Dockerfile ${OUTPUT_DIR}/
+
+sed "s/{{title}}/${TITLE}/" ./site/index.html \
+  | sed "s/{{description}}/${DESCRIPTION}/" \
+  > ${OUTPUT_DIR}/site/index.html
 

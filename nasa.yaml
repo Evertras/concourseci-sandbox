@@ -23,7 +23,7 @@ resources:
       password: ((dockerhub.access-token))
 
 jobs:
-  - name: title-echo
+  - name: build-site
     plan:
       - get: nasa-image-of-the-day
         trigger: true
@@ -33,21 +33,22 @@ jobs:
         config:
           inputs:
             - name: nasa-image-of-the-day
+            - name: nasa-git
           platform: linux
           image_resource:
             type: docker-image
             source: 
-              repository: alpine
+              repository: ubuntu
           run:
-            path: "sh"
-            #args: [ "nasa-image-of-the-day/link", "nasa-image-of-the-day/title" ]
+            path: "bash"
             args:
               - -exc
               - |
-                ./nasa-git/gen-site.sh $(cat nasa-image-of-the-day/title) $(cat nasa-image-of-the-day/description) $(cat nasa-image-of-the-day/link) ${PWD}/generated-site
+                mkdir -p ./generated-site/site
+                ./nasa-git/nasa/gen-site.sh "$(cat nasa-image-of-the-day/title)" "$(cat nasa-image-of-the-day/description)" "$(cat nasa-image-of-the-day/link)" ${PWD}/generated-site
           outputs:
             - name: generated-site
       - put: docker-image
         params:
-          build: generated-site
+          build: nasa-git/nasa
 
