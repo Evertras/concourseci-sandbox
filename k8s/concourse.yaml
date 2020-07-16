@@ -171,6 +171,7 @@ metadata:
     app: concourse
     component: worker
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: concourse
