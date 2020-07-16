@@ -50,5 +50,5 @@ jobs:
             - name: generated-site
       - put: docker-image
         params:
-          build: nasa-git/nasa
+          build: generated-site
 
