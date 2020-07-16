@@ -31,3 +31,5 @@ echo Targeting ${IMG_URL}
 
 curl $IMG_URL -sLo $OUTPUT_DIR/site/pic.jpg
 
+echo Done!
+
