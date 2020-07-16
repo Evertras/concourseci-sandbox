@@ -1,10 +1,27 @@
 <html>
   <head>
     <title>SPAAAAAAAACE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        .imgbox {
+            display: grid;
+            height: 100%;
+        }
+        .center-fit {
+            max-width: 100%;
+            max-height: 100vh;
+            margin: auto;
+        }
+    </style>
   </head>
   <body>
     <h1>{{title}}</h1>
-    <img src="pic.jpg">
+    <div class="imgbox">
+      <img class="center-fit" src="pic.jpg">
+    </div>
     <div>{{description}}</div>
   </body>
 </html>

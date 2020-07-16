@@ -1,0 +1,24 @@
+#!/bin/bash
+
+cd ${0%/*}
+
+if [ $# != 4 ]; then
+  echo 'Usage: ./gen-site.sh <title> <description> <URL> <output-dir>'
+  exit 1
+fi
+
+TITLE=${1}
+DESCRIPTION=${2}
+URL=${3}
+OUTPUT_DIR=${4}
+
+#IMG_URL=$(curl ${URL} \
+  #| grep 'meta property="og:image" content="' \
+  #| sed -n 's/.*content="\(.*\)".*/\1/p')
+
+#curl $IMG_URL -sLo site/pic.jpg
+
+sed "s/{{title}}/${TITLE}/" ./site/index.html \
+  | sed "s/{{description}}/${DESCRIPTION}/" \
+  > ${OUTPUT_DIR}/index.html
+

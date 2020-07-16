@@ -10,13 +10,26 @@ resources:
     type: rss-resource
     source:
       url: https://www.nasa.gov/rss/dyn/lg_image_of_the_day.rss
+  - name: nasa-git
+    type: git
+    source:
+      uri: https://github.com/Evertras/concourseci-sandbox
+      branch: master
+  - name: docker-image
+    type: docker-image
+    source:
+      repository: evertras/nasa-potd
+      username: ((dockerhub.username))
+      password: ((dockerhub.access-token))
 
 jobs:
   - name: title-echo
     plan:
       - get: nasa-image-of-the-day
         trigger: true
-      - task: build-daily-image
+      - get: nasa-git
+        trigger: true
+      - task: gen-site
         config:
           inputs:
             - name: nasa-image-of-the-day
@@ -26,6 +39,15 @@ jobs:
             source: 
               repository: alpine
           run:
-            path: cat
-            args: [ "nasa-image-of-the-day/link" ]
+            path: "sh"
+            #args: [ "nasa-image-of-the-day/link", "nasa-image-of-the-day/title" ]
+            args:
+              - -exc
+              - |
+                ./nasa-git/gen-site.sh $(cat nasa-image-of-the-day/title) $(cat nasa-image-of-the-day/description) $(cat nasa-image-of-the-day/link) ${PWD}/generated-site
+          outputs:
+            - name: generated-site
+      - put: docker-image
+        params:
+          build: generated-site
 
