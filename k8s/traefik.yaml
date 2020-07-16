@@ -34,7 +34,8 @@ spec:
           args:
             - --log.level=DEBUG
             - --api
-            - --api.insecure
+            - --api.insecure=true
+            - --api.dashboard=true
             - --entrypoints.web.address=:80
             - --providers.kubernetesingress
           ports:
@@ -109,6 +110,26 @@ subjects:
 - kind: ServiceAccount
   name: traefik-ingress-controller
   namespace: default
+
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1beta1
+metadata:
+  name: traefik-dashboard
+  namespace: concourse
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+
+spec:
+  rules:
+  - host: traefik.localhost
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: traefik
+          servicePort: 8080
+
 
 ---
 kind: Deployment
