@@ -9,19 +9,23 @@ fi
 
 TITLE=${1}
 DESCRIPTION=${2}
-PUDDATE=${3}
+PUBDATE=${3}
 URL=${4}
 OUTPUT_DIR=${5}
+
+# This doesn't work on mac because BSD date is sadness
+SHORTDATE=$(date -d "${PUBDATE}" '+%Y-%m-%d')
 
 echo "Title: ${TITLE}"
 echo "Description: ${DESCRIPTION}"
 echo "PubDate: ${PUBDATE}"
 echo "URL: ${URL}"
 echo "Output directory: ${OUTPUT_DIR}"
+echo "Short Date: ${SHORTDATE}"
 
 cp Dockerfile ${OUTPUT_DIR}/
 
-sed "s/{{title}}/${TITLE}/" ./site/index.html \
+sed "s/{{title}}/${SHORTDATE} - ${TITLE}/" ./site/index.html \
   | sed "s/{{description}}/${DESCRIPTION}/" \
   > ${OUTPUT_DIR}/site/index.html
 
@@ -33,9 +37,7 @@ echo Targeting ${IMG_URL}
 
 curl ${IMG_URL} -sLo ${OUTPUT_DIR}/site/pic.jpg
 
-TAG=$(date -d "${DATE}" '+%Y-%m-%d')
-
-echo ${TAG} > ${OUTPUT_DIR}/tag
+echo ${SHORTDATE} > ${OUTPUT_DIR}/tag
 
 echo Done!
 

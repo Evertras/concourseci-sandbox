@@ -44,11 +44,14 @@ jobs:
             args:
               - -exc
               - |
+                ls -R .
+                apt-get update && apt-get install -y curl
                 mkdir -p ./generated-site/site
-                ./nasa-git/nasa/gen-site.sh "$(cat nasa-image-of-the-day/title)" "$(cat nasa-image-of-the-day/description)" "$(cat nasa-image-of-the-day/link)" ${PWD}/generated-site
+                ./nasa-git/nasa/gen-site.sh "$(cat nasa-image-of-the-day/title)" "$(cat nasa-image-of-the-day/description)" "$(cat nasa-image-of-the-day/pubDate)" "$(cat nasa-image-of-the-day/link)" ${PWD}/generated-site
           outputs:
             - name: generated-site
       - put: docker-image
         params:
           build: generated-site
+          tag_file: generated-site/tag
 
