@@ -40,6 +40,19 @@ config-test: &config-test
       - -race
       - .
 
+config-lint: &config-lint
+  inputs:
+    - name: crudlib-git
+  platform: linux
+  run:
+    dir: crudlib-git/crudlib
+    path: "bash"
+    args:
+      - -exc
+      # Make sure that go fmt doesn't have to do anything; if it did, then someone
+      # didn't properly format their code!
+      - '[[ -z "$(go fmt .)" ]]'
+
 jobs:
   - name: test-1.12
     plan:
@@ -70,4 +83,8 @@ jobs:
         image: golang-1.14.x-image
         config:
           << : *config-test
+      - task: lint
+        image: golang-1.14.x-image
+        config:
+          << : *config-lint
 
