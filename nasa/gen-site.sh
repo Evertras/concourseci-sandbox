@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
 cd ${0%/*}
 
 if [ $# != 4 ]; then
-  echo 'Usage: ./gen-site.sh <title> <description> <URL> <output-dir>'
+  echo 'Usage: ./gen-site.sh <title> <description> <URL>'
   exit 1
 fi
 
@@ -18,7 +18,6 @@ OUTPUT_DIR=${4}
 
 #curl $IMG_URL -sLo site/pic.jpg
 
-sed "s/{{title}}/${TITLE}/" ./site/index.html \
-  | sed "s/{{description}}/${DESCRIPTION}/" \
-  > ${OUTPUT_DIR}/index.html
+sed -i "s/{{title}}/${TITLE}/" ./site/index.html
+sed -i "s/{{description}}/${DESCRIPTION}/" ./site/index.html
 
