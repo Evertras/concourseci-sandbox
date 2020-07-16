@@ -8,15 +8,18 @@ resource_types:
 resources:
   - name: nasa-image-of-the-day
     type: rss-resource
+    icon: space-station
     source:
       url: https://www.nasa.gov/rss/dyn/lg_image_of_the_day.rss
   - name: nasa-git
     type: git
+    icon: github
     source:
       uri: https://github.com/Evertras/concourseci-sandbox
       branch: master
   - name: docker-image
     type: docker-image
+    icon: docker
     source:
       repository: evertras/nasa-potd
       username: ((dockerhub.username))
