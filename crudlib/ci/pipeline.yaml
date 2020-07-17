@@ -1,4 +1,12 @@
 ---
+groups:
+  - name: unit
+    jobs:
+      - test-1.13
+      - test-1.14
+  - name: integration
+    jobs:
+      - test-integration
 resources:
   - name: crudlib-git
     type: git
@@ -6,13 +14,6 @@ resources:
     source:
       uri: https://github.com/Evertras/concourseci-sandbox
       branch: master
-
-  - name: golang-1.12.x-image
-    type: registry-image
-    icon: docker
-    source:
-      repository: golang
-      tag: '1.12'
 
   - name: golang-1.13.x-image
     type: registry-image
@@ -71,16 +72,6 @@ config-lint: &config-lint
         [[ -z "$(go fmt .)" ]]
 
 jobs:
-  - name: test-1.12
-    plan:
-      # TMP: Manual run
-      - get: crudlib-git
-      - get: golang-1.12.x-image
-      - task: test
-        image: golang-1.12.x-image
-        config:
-          << : *config-test
-
   - name: test-1.13
     plan:
       - get: crudlib-git
@@ -95,11 +86,6 @@ jobs:
           image: golang-1.13.x-image
           config:
             << : *config-lint
-      - task: integration
-        image: golang-1.13.x-image
-        privileged: true
-        config:
-          << : *config-test-integration
 
   - name: test-1.14
     plan:
@@ -115,4 +101,17 @@ jobs:
           image: golang-1.14.x-image
           config:
             << : *config-lint
+
+  - name: test-integration
+    plan:
+      - get: crudlib-git
+        passed:
+          - test-1.13
+        trigger: true
+      - get: golang-1.13.x-image
+      - task: integration
+        image: golang-1.13.x-image
+        privileged: true
+        config:
+          << : *config-test-integration
 
