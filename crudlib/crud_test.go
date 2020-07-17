@@ -3,9 +3,9 @@ package crudlib
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 	"time"
-	"os"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/testcontainers/testcontainers-go"
@@ -29,13 +29,13 @@ func TestAddsDogAndRetrievesAge(t *testing.T) {
 	ctx := context.Background()
 
 	req := testcontainers.ContainerRequest{
-		Image: "redis",
+		Image:        "redis",
 		ExposedPorts: []string{"6379/tcp"},
-		WaitingFor: wait.ForLog("Ready to accept connections"),
+		WaitingFor:   wait.ForLog("Ready to accept connections"),
 	}
 	redisContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
-		Started: true,
+		Started:          true,
 	})
 
 	if err != nil {
