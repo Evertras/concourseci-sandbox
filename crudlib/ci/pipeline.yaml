@@ -40,6 +40,21 @@ config-test: &config-test
       - -race
       - .
 
+config-test-integration: &config-test-integration
+  inputs:
+    - name: crudlib-git
+  platform: linux
+  params:
+    TEST_INTEGRATION: 'true'
+    DOCKER_HOST: 'tcp://10.1.188.156:2375'
+  run:
+    dir: crudlib-git/crudlib
+    path: "go"
+    args:
+      - test
+      - -race
+      - .
+
 config-lint: &config-lint
   inputs:
     - name: crudlib-git
@@ -51,13 +66,15 @@ config-lint: &config-lint
       - -exc
       # Make sure that go fmt doesn't have to do anything; if it did, then someone
       # didn't properly format their code!
-      - '[[ -z "$(go fmt .)" ]]'
+      - |
+        go mod download
+        [[ -z "$(go fmt .)" ]]
 
 jobs:
   - name: test-1.12
     plan:
+      # TMP: Manual run
       - get: crudlib-git
-        trigger: true
       - get: golang-1.12.x-image
       - task: test
         image: golang-1.12.x-image
@@ -69,22 +86,33 @@ jobs:
       - get: crudlib-git
         trigger: true
       - get: golang-1.13.x-image
-      - task: test
+      - in_parallel:
+        - task: test
+          image: golang-1.13.x-image
+          config:
+            << : *config-test
+        - task: lint
+          image: golang-1.13.x-image
+          config:
+            << : *config-lint
+      - task: integration
         image: golang-1.13.x-image
+        privileged: true
         config:
-          << : *config-test
+          << : *config-test-integration
 
   - name: test-1.14
     plan:
+      # TMP: Manual run
       - get: crudlib-git
-        trigger: true
       - get: golang-1.14.x-image
-      - task: test
-        image: golang-1.14.x-image
-        config:
-          << : *config-test
-      - task: lint
-        image: golang-1.14.x-image
-        config:
-          << : *config-lint
+      - in_parallel:
+        - task: test
+          image: golang-1.14.x-image
+          config:
+            << : *config-test
+        - task: lint
+          image: golang-1.14.x-image
+          config:
+            << : *config-lint
 
