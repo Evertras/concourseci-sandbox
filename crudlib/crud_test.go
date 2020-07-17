@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 	"time"
+	"os"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/testcontainers/testcontainers-go"
@@ -21,7 +22,9 @@ func TestAddsTwoPlusTwo(t *testing.T) {
 }
 
 func TestAddsDogAndRetrievesAge(t *testing.T) {
-	//t.Skip("Integration only")
+	if os.Getenv("TEST_INTEGRATION") != "true" {
+		t.Skip("TEST_INTEGRATION environment variable not set to true")
+	}
 
 	ctx := context.Background()
 
