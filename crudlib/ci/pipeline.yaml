@@ -28,7 +28,7 @@ resources:
     type: pull-request
     check_every: 24h
     source:
-      repository: https://github.com/Evertras/concourseci-sandbox
+      repository: Evertras/concourseci-sandbox
       access_token: ((github.access-token))
 
   - name: golang-1.13.x-image
