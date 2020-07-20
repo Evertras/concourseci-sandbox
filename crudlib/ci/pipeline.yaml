@@ -138,6 +138,7 @@ jobs:
     plan:
       - get: golang-1.13.x-image
       - get: crudlib-pr
+        trigger: true
       - put: crudlib-pr
         params:
           path: crudlib-pr
@@ -151,12 +152,12 @@ jobs:
           platform: linux
           run:
             dir: crudlib-pr/crudlib
-            path: /bin/sh
+            path: "bash"
             args:
               - -exc
               - |
                 go test -race -v .
-                [[ -z "$(gofmt .)" ]]
+                [[ -z "$(go fmt .)" ]]
         on_failure:
           put: crudlib-pr
           params:
