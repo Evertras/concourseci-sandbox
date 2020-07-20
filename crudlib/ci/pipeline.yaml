@@ -133,17 +133,30 @@ jobs:
         privileged: true
         config:
           << : *config-test-integration
+
   - name: pr
     plan:
+      - get: golang-1.13.x-image
       - get: crudlib-pr
       - put: crudlib-pr
         params:
           path: crudlib-pr
           status: pending
+          comment: 'Autocomment: Running tests'
       - task: test
         image: golang-1.13.x-image
         config:
-          << : *config-test
+          inputs:
+            - name: crudlib-pr
+          platform: linux
+          run:
+            dir: crudlib-pr/crudlib
+            path: /bin/sh
+            args:
+              - -exc
+              - |
+                go test -race -v .
+                [[ -z "$(gofmt .)" ]]
         on_failure:
           put: crudlib-pr
           params:
