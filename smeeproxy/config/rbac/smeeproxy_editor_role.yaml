@@ -1,0 +1,24 @@
+# permissions for end users to edit smeeproxies.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: smeeproxy-editor-role
+rules:
+- apiGroups:
+  - smeeproxy.evertras.com
+  resources:
+  - smeeproxies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - smeeproxy.evertras.com
+  resources:
+  - smeeproxies/status
+  verbs:
+  - get

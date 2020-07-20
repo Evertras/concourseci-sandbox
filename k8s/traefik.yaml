@@ -59,10 +59,6 @@ spec:
       port: 80
       name: web
       targetPort: 80
-    - protocol: TCP
-      port: 8080
-      name: admin
-      targetPort: 8080
 
 ---
 kind: ClusterRole

@@ -1,0 +1,7 @@
+domain: evertras.com
+repo: github.com/evertras/concourseci-sandbox/smeeproxy
+resources:
+- group: smeeproxy
+  kind: SmeeProxy
+  version: v1
+version: "2"

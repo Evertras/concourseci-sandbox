@@ -1,0 +1,7 @@
+apiVersion: smeeproxy.evertras.com/v1
+kind: SmeeProxy
+metadata:
+  name: smeeproxy-sample
+spec:
+  # Add fields here
+  foo: bar
