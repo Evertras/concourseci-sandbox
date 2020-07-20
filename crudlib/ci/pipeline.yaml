@@ -27,6 +27,7 @@ resources:
   - name: crudlib-pr
     type: pull-request
     check_every: 24h
+    webhook_token: crudlib-pr
     source:
       repository: Evertras/concourseci-sandbox
       access_token: ((github.access-token))
