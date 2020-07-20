@@ -1,12 +1,21 @@
 ---
 groups:
-  - name: unit
+  - name: test
     jobs:
       - test-1.13
       - test-1.14
-  - name: integration
-    jobs:
       - test-integration
+
+  - name: pr
+    jobs:
+      - pr
+
+resource_types:
+  - name: pull-request
+    type: docker-image
+    source:
+      repository: teliaoss/github-pr-resource
+
 resources:
   - name: crudlib-git
     type: git
@@ -14,6 +23,14 @@ resources:
     source:
       uri: https://github.com/Evertras/concourseci-sandbox
       branch: master
+
+  - name: crudlib-pr
+    type: pull-request
+    check_every: 24h
+    webhook_token: crudlib-pr
+    source:
+      repository: Evertras/concourseci-sandbox
+      access_token: ((github.access-token))
 
   - name: golang-1.13.x-image
     type: registry-image
@@ -39,6 +56,7 @@ config-test: &config-test
     args:
       - test
       - -race
+      - -v
       - .
 
 config-test-integration: &config-test-integration
@@ -47,6 +65,7 @@ config-test-integration: &config-test-integration
   platform: linux
   params:
     TEST_INTEGRATION: 'true'
+    # This is super dumb
     DOCKER_HOST: 'tcp://10.1.188.156:2375'
   run:
     dir: crudlib-git/crudlib
@@ -54,6 +73,7 @@ config-test-integration: &config-test-integration
     args:
       - test
       - -race
+      - -v
       - .
 
 config-lint: &config-lint
@@ -114,4 +134,38 @@ jobs:
         privileged: true
         config:
           << : *config-test-integration
+
+  - name: pr
+    plan:
+      - get: golang-1.13.x-image
+      - get: crudlib-pr
+        trigger: true
+      - put: crudlib-pr
+        params:
+          path: crudlib-pr
+          status: pending
+          comment: 'Autocomment: Running tests'
+      - task: test
+        image: golang-1.13.x-image
+        config:
+          inputs:
+            - name: crudlib-pr
+          platform: linux
+          run:
+            dir: crudlib-pr/crudlib
+            path: "bash"
+            args:
+              - -exc
+              - |
+                go test -race -v .
+                [[ -z "$(go fmt .)" ]]
+        on_failure:
+          put: crudlib-pr
+          params:
+            path: crudlib-pr
+            status: failure
+      - put: crudlib-pr
+        params:
+          path: crudlib-pr
+          status: success
 
