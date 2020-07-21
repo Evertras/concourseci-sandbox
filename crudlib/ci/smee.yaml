@@ -1,0 +1,9 @@
+apiVersion: smeeproxy.evertras.com/v1
+kind: SmeeProxy
+metadata:
+  name: crudlib-webhooks
+  namespace: concourse
+spec:
+  smeeURL: "https://smee.io/wwn96VW5fzTDzSci"
+  targetURL: "http://web-http.concourse.svc.cluster.local:8080/api/v1/teams/main/pipelines/crudlib/resources/crudlib-pr/check/webhook?webhook_token=crudlib-pr"
+
