@@ -139,61 +139,6 @@ var _ = Context("Inside of a new namespace", func() {
 			Expect(foundURL).To(BeTrue())
 			Expect(foundTarget).To(BeTrue())
 		})
-
-		It("deletes a pod when the SmeeProxy resource is deleted", func() {
-			testName := "test-proxy"
-			smeeProxy := &smeeproxyv1.SmeeProxy{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      testName,
-					Namespace: ns.Name,
-				},
-				Spec: smeeproxyv1.SmeeProxySpec{
-					SmeeURL:   "http://doesntexistsmee",
-					TargetURL: "http://targetalsodoesntexist",
-				},
-			}
-
-			err := k8sClient.Create(ctx, smeeProxy)
-
-			Expect(err).NotTo(HaveOccurred(), "failed to create test SmeeProxy resource")
-
-			pod := &corev1.Pod{}
-
-			// This is fragile, how to do this more cleanly with this setup?
-			podName := "smeeproxy-" + testName
-
-			Eventually(
-				func() error {
-					return k8sClient.Get(
-						ctx,
-						client.ObjectKey{
-							Name:      podName,
-							Namespace: ns.Name,
-						},
-						pod,
-					)
-				},
-				time.Second*5,
-				time.Millisecond*500,
-			).Should(BeNil())
-
-			k8sClient.Delete(ctx, smeeProxy)
-
-			Eventually(
-				func() error {
-					return k8sClient.Get(
-						ctx,
-						client.ObjectKey{
-							Name:      podName,
-							Namespace: ns.Name,
-						},
-						pod,
-					)
-				},
-				time.Second*5,
-				time.Millisecond*500,
-			).ShouldNot(BeNil())
-		})
 	})
 })
 
