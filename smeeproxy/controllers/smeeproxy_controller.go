@@ -53,12 +53,7 @@ func (r *SmeeProxyReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if err := r.Get(ctx, req.NamespacedName, &smeeProxy); err != nil {
 		if errors.IsNotFound(err) {
-			log.Info("SmeeProxy deleted, deleting any pods it may have had")
-			pod := corev1.Pod{}
-			if err := r.Client.Get(ctx, client.ObjectKey{Namespace: smeeProxy.Namespace, Name: podName}, &pod); err == nil {
-				log.Info("Actually deleting")
-				return ctrl.Result{}, r.Client.Delete(ctx, &pod)
-			}
+			log.Info("SmeeProxy deleted")
 
 			return ctrl.Result{}, nil
 		}
